@@ -26,6 +26,8 @@
 
 {% block content %}
     {% load static %}
+
+    <!-- start previous.......................... -->
     {% if post.id > first.id %}
         <a href="{% url 'single_post' id=post.id|add:'-1' %}" class="fh5co-post-prev"><span><i
                 class="icon-chevron-left"></i> Prev</span></a>
@@ -36,6 +38,8 @@
                 class="icon-chevron-right"></i></span></a>
 
     {% endif %}
+    <!-- end of Next................................  -->
+
     <!-- END #fh5co-header -->
     <div class="container-fluid">
     <div class="row fh5co-post-entry single-entry">

@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, get_object_or_404, redirect
+from django.shortcuts import render, Http404, HttpResponse, get_object_or_404, redirect
 from .models import author, category, article, comment
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -12,16 +12,16 @@ from django.contrib import messages
 def index(request):
     post = article.objects.all()
 
-    # start for search
+    # start for search..................................
     search = request.GET.get('q')
     if search:
         post = post.filter(
             Q(title__icontains=search) |
             Q(body__icontains=search)
         )
-        # end search
+        # end search...................................
 
-    # start for search
+    # start for pagination
     paginator = Paginator(post, 4)  # Show 25 contacts per page.
 
     page_number = request.GET.get('page')
@@ -51,7 +51,7 @@ def getsingle(request, id):
     first = article.objects.first()
     last = article.objects.last()
     getComment = comment.objects.filter(post=id)
-    related = article.objects.filter(category=post.category).exclude(id=id)[:4]
+    related = article.objects.filter(category=post.category).exclude(id=id)[:4]  # getting all post to show related post
     form = commentForm(request.POST or None)
     if form.is_valid():
         instance = form.save(commit=False)
@@ -72,7 +72,7 @@ def getsingle(request, id):
 def getTopic(request, name):
     cat = get_object_or_404(category, name=name)
     post = article.objects.filter(category=cat.id)
-    paginator = Paginator(post, 4)  # Show 25 contacts per page.
+    paginator = Paginator(post, 4)  # Show 25 topic per page.
 
     page_number = request.GET.get('page')
     total_article = paginator.get_page(page_number)
@@ -180,15 +180,21 @@ def getRegister(request):
 def getCategory(request):
     query = category.objects.all()
 
-    return render(request, 'topics.html', {"topic": query})
+    return render(request, 'topicsByCategory.html', {"topic": query})
 
 
-def createTopic(request):
-    # if request.user.is_authenticated:
-    form = categoryForm(request.POST or None)
-    if form.is_valid():
-        instance = form.save(commit=False)
-        instance.save()
-        messages.success(request, 'Category is successfully created')
-        return redirect('category')
-    return render(request, 'create_topics.html', {"form": form})
+def createCategory(request):
+    if request.user.is_authenticated:
+        if request.user.is_staff or request.user.is_superuser:
+            form = categoryForm(request.POST or None)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.save()
+                messages.success(request, 'Category is successfully created')
+                return redirect('category')
+            return render(request, 'create_topics.html', {"form": form})
+        else:
+            raise Http404("You are not permitted")
+
+    else:
+        return redirect('login')

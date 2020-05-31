@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 
 # Create your models here.
@@ -30,6 +31,10 @@ class article(models.Model):
 
     def __str__(self):
         return self.title
+
+# another way of url mapping
+    #def get_single_url(self):
+       # return reverse('single_post', kwargs={"id": self.id})
 
 
 class comment(models.Model):

@@ -30,6 +30,6 @@ urlpatterns = [
     path('update/<int:pid>', views.getUpdate, name="update"),
     path('delete/<int:pid>', views.getDelete, name="delete"),
     path('register', views.getRegister, name="register"),
-    path('topics', views.getCategory, name="category"),
-    path('createTopic', views.createTopic, name="createTopic")
+    path('category', views.getCategory, name="category"),
+    path('createCategory', views.createCategory, name="createCategory")
 ]
