@@ -37,7 +37,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog',
+
+    # 3rd party apps
+    'ckeditor',
+    'ckeditor_uploader'
 ]
+CKEDITOR_UPLOAD_PATH = 'uploads/'
+
+CKEDITOR_CONFIGS = {
+
+    'default': {
+        'toolbar': 'full',
+        'height': 300,
+        'width': 300,
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -134,3 +148,11 @@ MESSAGE_TAGS = {
     message.ERROR: 'alert alert-danger',
     message.DEBUG: 'alert alert-info'
 }
+
+# GMAIL confirmation
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'mdhossen0003@gmail.com'
+EMAIL_HOST_PASSWORD = 'mhali0000'
+EMAIL_PORT = 587
+ACCOUNT_EMAIL_VERIFICATION = "none"

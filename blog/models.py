@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 
 
 # Create your models here.
@@ -23,7 +25,7 @@ class category(models.Model):
 class article(models.Model):
     article_author = models.ForeignKey(author, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
-    body = models.TextField()
+    body = RichTextUploadingField()
     image = models.FileField()
     posted_on = models.DateTimeField(auto_now=False, auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True, auto_now_add=False)
@@ -32,9 +34,10 @@ class article(models.Model):
     def __str__(self):
         return self.title
 
+
 # another way of url mapping
-    #def get_single_url(self):
-       # return reverse('single_post', kwargs={"id": self.id})
+# def get_single_url(self):
+# return reverse('single_post', kwargs={"id": self.id})
 
 
 class comment(models.Model):

@@ -19,8 +19,8 @@ from . import views
 
 urlpatterns = [
 
-    path('', views.index, name="index"),
-    path('author/<name>', views.getauthor, name="author"),
+    path('', views.index.as_view(), name="index"),
+    path('author/<name>', views.getauthor.as_view(), name="author"),
     path('single/<int:id>', views.getsingle, name="single_post"),
     path('topic/<name>', views.getTopic, name="topic"),
     path('login', views.getLogin, name="login"),
@@ -31,5 +31,8 @@ urlpatterns = [
     path('delete/<int:pid>', views.getDelete, name="delete"),
     path('register', views.getRegister, name="register"),
     path('category', views.getCategory, name="category"),
-    path('createCategory', views.createCategory, name="createCategory")
+    path('createCategory', views.createCategory, name="createCategory"),
+
+    # account confirmations
+    path('activate/<uid>/<token>', views.activate, name="activate")
 ]

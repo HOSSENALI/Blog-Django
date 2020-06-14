@@ -6,46 +6,56 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from .forms import createForm, registerUser, createAuthor, commentForm, categoryForm
 from django.contrib import messages
+from django.views import View
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.core.mail import send_mail
+from .token import activation_token
 
 
 # Create your views here.
-def index(request):
-    post = article.objects.all()
+class index(View):
+    def get(self, request):
+        post = article.objects.all()
 
-    # start for search..................................
-    search = request.GET.get('q')
-    if search:
-        post = post.filter(
-            Q(title__icontains=search) |
-            Q(body__icontains=search)
-        )
-        # end search...................................
+        # start for search..................................
+        search = request.GET.get('q')
+        if search:
+            post = post.filter(
+                Q(title__icontains=search) |
+                Q(body__icontains=search)
+            )
+            # end search...................................
 
-    # start for pagination
-    paginator = Paginator(post, 4)  # Show 25 contacts per page.
+        # start for pagination
+        paginator = Paginator(post, 4)  # Show 25 contacts per page.
 
-    page_number = request.GET.get('page')
-    total_article = paginator.get_page(page_number)
-    # end pagination
+        page_number = request.GET.get('page')
+        total_article = paginator.get_page(page_number)
+        # end pagination
 
-    context = {
-        "post": total_article
-    }
+        context = {
+            "post": total_article
+        }
 
-    return render(request, "index.html", context)
-
-
-def getauthor(request, name):
-    post_author = get_object_or_404(User, username=name)
-    auth = get_object_or_404(author, name=post_author.id)
-    post = article.objects.filter(article_author=auth.id)
-    context = {
-        "auth": auth,
-        "post": post
-    }
-    return render(request, "profile.html", context)
+        return render(request, "index.html", context)
 
 
+# class based view................
+class getauthor(View):
+    def get(self, request, name):
+        post_author = get_object_or_404(User, username=name)
+        auth = get_object_or_404(author, name=post_author.id)
+        post = article.objects.filter(article_author=auth.id)
+        context = {
+            "auth": auth,
+            "post": post
+        }
+        return render(request, "profile.html", context)
+
+
+# funtion based view..........
 def getsingle(request, id):
     post = get_object_or_404(article, pk=id)
     first = article.objects.first()
@@ -171,9 +181,22 @@ def getRegister(request):
     form = registerUser(request.POST or None)
     if form.is_valid():
         instance = form.save(commit=False)
+        instance.is_active = False
         instance.save()
-        messages.success(request, 'Registration successfully completed')
-        return redirect('login')
+        site = get_current_site(request)
+        mail_subject = "Confirmation message for blog"
+        message = render_to_string('confirm_email.html', {
+            "user": instance,
+            'domain': site.domain,
+            'uid': instance.id,
+            'token': activation_token.make_token(instance)
+        })
+        to_email = form.cleaned_data.get('email')
+        to_list = [to_email]
+        from_email = settings.EMAIL_HOST_USER
+        send_mail(mail_subject, message, from_email, to_list, fail_silently=True)
+        return HttpResponse("<h1>Thanks for your registration. A confirmation link was sent to your email</h1>")
+
     return render(request, 'register.html', {"form": form})
 
 
@@ -198,3 +221,16 @@ def createCategory(request):
 
     else:
         return redirect('login')
+
+
+def activate(request, uid, token):
+    try:
+        user = get_object_or_404(User, pk=uid)
+    except:
+        raise Http404("No user found")
+    if user is not None and activation_token.check_token(user,token):
+        user.is_active = True
+        user.save()
+        return HttpResponse("<h1> Account is activated. Now you can <a href='/login'>Login</a>")
+    else:
+        return HttpResponse("<h3> Invalid activation link")
