@@ -1,3 +1,4 @@
+from django.core import serializers
 from django.shortcuts import render, Http404, HttpResponse, get_object_or_404, redirect
 from .models import author, category, article, comment
 from django.contrib.auth import authenticate, login, logout
@@ -11,6 +12,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.core.mail import send_mail
+
+from .require import renderPdf
 from .token import activation_token
 
 
@@ -228,9 +231,33 @@ def activate(request, uid, token):
         user = get_object_or_404(User, pk=uid)
     except:
         raise Http404("No user found")
-    if user is not None and activation_token.check_token(user,token):
+    if user is not None and activation_token.check_token(user, token):
         user.is_active = True
         user.save()
         return HttpResponse("<h1> Account is activated. Now you can <a href='/login'>Login</a>")
     else:
         return HttpResponse("<h3> Invalid activation link")
+
+
+def pdf(request, id):
+    try:
+        query = get_object_or_404(article, id=id)
+    except:
+        Http404('Content not found')
+    context = {
+        "article": query
+    }
+    article_pdf = renderPdf('pdf.html', context)
+    return HttpResponse(article_pdf, content_type='application/pdf')
+
+
+def getJson(request):
+    data = article.objects.all()
+    jsonData = serializers.serialize("json", data, indent=2, fields=["title", "body", "image"])
+    return HttpResponse(jsonData, content_type="application/json")
+
+
+def getXml(request):
+    data = article.objects.all()
+    jsonData = serializers.serialize("xml", data)
+    return HttpResponse(jsonData, content_type="application/xml")

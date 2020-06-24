@@ -65,10 +65,11 @@
         </article>
     </div>
     <div class="container">
+    <a href="{% url 'pdf' id=post.id %}"> Save As Pdf</a>
     <h3 class="well">Related Post</h3>
     <div class="row">
         {% for r in related %}
-            <div class="col-md-3">\
+            <div class="col-md-3">
                 <figure class="animate-box">
                     <a href="{% url 'single_post' id=r.id %}"> <img src="{{ r.image.url }}" alt="Image"
                                                                     class="responsive"></a>

@@ -34,5 +34,11 @@ urlpatterns = [
     path('createCategory', views.createCategory, name="createCategory"),
 
     # account confirmations
-    path('activate/<uid>/<token>', views.activate, name="activate")
+    path('activate/<uid>/<token>', views.activate, name="activate"),
+
+    path('pdf/<int:id>', views.pdf, name="pdf"),
+
+    # Json and Xml
+    path('json', views.getJson, name="json"),
+    path('xml', views.getXml, name="xml"),
 ]
